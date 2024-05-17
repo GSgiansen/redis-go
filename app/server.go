@@ -21,18 +21,21 @@ func main() {
 		os.Exit(1)
 	}
 
+	defer l.Close()
 	conn, err := l.Accept()
 	if err != nil {
 		fmt.Println("Error accepting connection: ", err.Error())
 		os.Exit(1)
 	}
+	defer conn.Close()
 
-	_, err = conn.Write([]byte(keyword))
-	if err != nil {
-		fmt.Println("Error writing to connection: ", err.Error())
-		os.Exit(1)
+	for {
+		buf := make([]byte, 1024)
+		_, err := conn.Read(buf)
+		if err != nil {
+			fmt.Println("Error reading: ", err.Error())
+			os.Exit(1)
+		}
+		conn.Write([]byte("+PONG\r\n"))
 	}
-
-	conn.Close()
-
 }
